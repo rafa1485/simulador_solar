@@ -1,10 +1,18 @@
+clear;
+clc;
+
+
 global Pirx;
 global Pfrx;
 global Pfry;
 global Piry;
 global Pnx; 
 global Pny;
+global segmentos;
+segmentos = [];
 
+global segmentos_chocados;
+segmentos_chocados = []
 
 function resultado = graficar_segmentos(nombre_input)
 
@@ -20,6 +28,9 @@ text1 = readxls(nombre_input);
 
 resultado = []
 
+//Listas 
+
+
 for fila = 1:num_filas
     // Obtener la fila actual como un vector
     fila_actual = text1(1)(fila, :);
@@ -31,13 +42,14 @@ for fila = 1:num_filas
     global Pfrx;
     global Pfry;
     global Piry;
-
+    global segmentos;
 
     Pirx = fila_actual(1);
     Pfrx = fila_actual(2);
     Pfry = fila_actual(4);
     Piry = fila_actual(3);
 
+    segmentos = [segmentos; Pirx, Pfrx, Piry, Pfry]
     // Sumar la fila actual a la variable resultado
     resultado = [resultado ; fila_actual];
 
@@ -92,34 +104,54 @@ Vu = [cosd(angulo), sind(angulo)]
 
 function matrices = sistemaecuaciones(Pfrx, Pirx, Pfry, Piry, rnx, rny)
     funcprot(0);
-    //Defino la matriz M
-    M = [1 0 -(Pfrx-Pirx)   0;
-         0 1 -(Pfry-Piry)   0;
-         1 0      0       -rnx;
-         0 1      0       -rny]
     
-    //X = [Prx; Pry; lambdaR; alphanR]
+    global segmentos;
+    global segmentos_chocados;
     
-    global Pnx; 
-    global Pny;
-    Pnx = P(1,1); 
-    Pny = P(2,1);
-    
-    b = [Pirx; Piry; Pnx; Pny] //Pirx; Piry; Pnx; Pny (Pnx=2; Pny=8)
+    [n_filas, n_columnas] = size(segmentos);
+//    disp('numero de filas: ' , n_filas);
+//    disp('numero de columnas: ' , n_columnas);    
+    for fila = 1:n_filas
+        //% Accede a la fila actual de la matriz
+        fila_actual = segmentos(fila, :);
         
-//    disp(M)
-//    disp('-------------')
-//    disp(b)    
-    matrices = linsolve(M,b);
-    matrices = matrices*(-1)
-//    disp('Resultado del sistema de ecuaciones: ')
-//    disp(matrices)
-    disp('Valor de Prx: ', matrices(1))
-    disp('Valor de Pry: ', matrices(2))
-    disp('Valor de lambda: ', matrices(3))
-    disp('Valor de alpha: ', matrices(4))
+        //Defino la matriz M
+        M = [1 0 -(fila_actual(2)-fila_actual(1))   0; //punto final del segmento en x y punto inicial en x. Ahora l oescribo en términos de fila_actual
+             0 1 -(fila_actual(4)-fila_actual(3))   0; //punto final del segmento en y, y punto inicial en y. Ahora l oescribo en términos de fila_actual
+             1 0      0       -rnx;
+             0 1      0       -rny]
+        
+        global Pnx; 
+        global Pny;
+        //posicion inicial del rayo
+        Pnx = P(1,1); 
+        Pny = P(2,1);
+        
+        b = [fila_actual(1); fila_actual(3); Pnx; Pny] //Pirx; Piry; Pnx; Pny (Pnx=2; Pny=8)
+            
+        matrices = linsolve(M,b);
+        matrices = matrices*(-1)
+        
+
+        //% Realiza operaciones con la fila actual, por ejemplo:
+//        disp(fila_actual);
+        disp('Valor de Prx: ', matrices(1))
+        disp('Valor de Pry: ', matrices(2))
+        disp('Valor de lambda: ', matrices(3))
+        disp('Valor de alpha: ', matrices(4))
+        disp('---------------------------')
+
+        if matrices(3) < 1 && matrices(3) > 0
+            //agrego a lista
+            //el sistema de ecuaciones considera también la proyección de los segmentos. Entonces, vamos a encontrar
+            //que el sist de ec va a ser resuelto con valores positivos.
+            segmentos_chocados = [segmentos_chocados; fila_actual]
+            plot([P(1,2), P(1,2)+rnx*matrices(4)], [P(2,2), P(2,2)+rny*matrices(4)], 'red')
+        end        
+    end
     
-    plot([P(1,2), P(1,2)+rnx*matrices(4)], [P(2,2), P(2,2)+rny*matrices(4)], 'red')
+    disp(segmentos_chocados)
+    
 endfunction
 
 
