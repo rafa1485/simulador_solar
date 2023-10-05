@@ -102,8 +102,10 @@ resultado = graficar_segmentos(nombre_input)
 //Posición inicial del rayo
 //P = [2, 2; 8, 8]
 //plot(P)
+global angulo;
 angulo = -30;
 //Vector unitario. Nos da la dirección del vector. 
+global Vu;
 Vu = [cosd(angulo), sind(angulo)]
 //Largo necesario para que el rayo toque al segmento
 //L = 3.459
@@ -118,104 +120,144 @@ Vu = [cosd(angulo), sind(angulo)]
 
 
 function matrices = sistemaecuaciones(Pfrx, Pirx, Pfry, Piry, rnx, rny)
-    funcprot(0);
-    
-    global segmentos;
-    global segmentos_chocados;
-    
-    [n_filas, n_columnas] = size(segmentos);
-    //[fila_rayo, columna_rayo] = size(rayos);
+    recorro_otra_vez = 1;
 
-    //for fila = 1:fila_rayo
-        for fila = 1:n_filas
-            //% Accede a la fila actual de la matriz
-            fila_actual = segmentos(fila, :);
+    while recorro_otra_vez == 1
+        funcprot(0);
+        
+        global segmentos;
+        global segmentos_chocados;
+        
+        [n_filas, n_columnas] = size(segmentos);
+        //[fila_rayo, columna_rayo] = size(rayos);
+    
+        //for fila = 1:fila_rayo
+            for fila = 1:n_filas
+                //% Accede a la fila actual de la matriz
+                fila_actual = segmentos(fila, :);
+                
+                //Defino la matriz M
+                M = [1 0 -(fila_actual(2)-fila_actual(1))   0; //punto final del segmento en x y punto inicial en x. Ahora l oescribo en términos de fila_actual
+                     0 1 -(fila_actual(4)-fila_actual(3))   0; //punto final del segmento en y, y punto inicial en y. Ahora l oescribo en términos de fila_actual
+                     1 0      0       -rnx;
+                     0 1      0       -rny]
+                
+                global Pnx; 
+                global Pny;
+                //posicion inicial del rayo
+                Pnx = rayos(1); //P(1,1); 
+                Pny = rayos(2); //P(2,1);
+                
+                b = [fila_actual(1); fila_actual(3); Pnx; Pny] //Pirx; Piry; Pnx; Pny (Pnx=2; Pny=8)
+                    
+                matrices = linsolve(M,b);
+                matrices = matrices*(-1)
+                
+        
+                //% Realiza operaciones con la fila actual, por ejemplo:
+        //        disp(fila_actual);
+                disp('Valor de Prx: ', matrices(1))
+                disp('Valor de Pry: ', matrices(2))
+                disp('Valor de lambda: ', matrices(3))
+                disp('Valor de alpha: ', matrices(4))
+                disp('---------------------------')
+        
+                global variables_segmentos;
+                if matrices(3) < 1 && matrices(3) > 0
+                    //agrego a lista
+                    //el sistema de ecuaciones considera también la proyección de los segmentos. Entonces, vamos a encontrar
+                    //que el sist de ec va a ser resuelto con valores positivos.
+                    segmentos_chocados = [segmentos_chocados; fila_actual]
+                    //plot([rayos(1,1), rayos(1,1)+rnx*matrices(4)], [rayos(1,2), rayos(1,2)+rny*matrices(4)], 'red')
+                    variables_segmentos = [variables_segmentos; matrices(1), matrices(2), matrices(3), matrices(4)] //es el mismo orden que arriba
+                end        
+            end
+    //    end
+        
+        disp(segmentos_chocados)
+        
+        //Menor valor de alpha (longitud)
+        disp('Menor valor de alpha')
+        disp(min(variables_segmentos(:, 4)))
+        
+        //fila completa donde está ese valor menor de alpha
+        [filas, columnas] = find(variables_segmentos == min(variables_segmentos(:, 4)));
+        //disp('Fila donde se encuentra este valor', variables_segmentos(filas, :))
+        //disp(variables_segmentos(filas, :))
+        disp('VALOR ANGULO', angulo)
+        plot([rayos(1), rayos(1)+rnx*variables_segmentos(filas, 4)], [rayos(2), rayos(2)+rny*variables_segmentos(filas, 4)], 'red')
+        variables_rebote = [variables_segmentos(filas, :)]
+        disp('Variables rebote: ', variables_rebote)
+        //min(variables_segmentos(:, 4))
+        //[filas, columnas] = find(variables_segmentos == min(variables_segmentos(:, 4)));
+        disp(filas)
+        
+        //acá pongo el segmento que fue chocado para acceder a sus posiciones en x e y
+        global segmento_evaluado;
+        segmento_evaluado = segmentos_chocados(filas, :)
+        
+        //vector del segmento
+        v1 = [segmento_evaluado(2) - segmento_evaluado(1),  //Xf-Xi
+              segmento_evaluado(4) - segmento_evaluado(3)]; //Yf-Yi
+    
+        v2 = [variables_rebote(1) - rayos(1), 
+              variables_rebote(2) - rayos(2)];
+        
+        prod_escalar = v1(1) * v2(1) + v1(2) * v2(2);
+        disp(prod_escalar)
+        
+        angulo_rebote_segmento = acosd(prod_escalar/(norm(v1) * norm(v2)));
+        disp('Ángulo de rebote', angulo_rebote_segmento);
+        
+        angulo_segmento = asind((segmento_evaluado(4) - segmento_evaluado(3))/norm(v1));
+        disp('Ángulo del segmento respecto del eje X', angulo_segmento)
+        angulo_rayo_rebote_x = angulo_rebote_segmento + angulo_segmento;
+        
+        disp('Ángulo de rebote respecto del eje x: ', angulo_rayo_rebote_x)
+    
+        //Pfrx, Pirx, Pfry, Piry, rnx, rny
+        //tengo que restablecer los valores iniciales del rayo, restablecer los valores de los cosenos directores, dibujar el nuevo rayo
+        
+    //if isempty(segmento_evaluado) then
+    //    recorro_otravez = 0;
+    //else 
+    //    recorro_otravez = 1;
+    //end
+    //    
+        if(recorro_otra_vez == 0) then
+            break;
+        else
+            //rnx, rny, angulo
+            global angulo;
+            angulo = angulo_rayo_rebote_x;
             
-            //Defino la matriz M
-            M = [1 0 -(fila_actual(2)-fila_actual(1))   0; //punto final del segmento en x y punto inicial en x. Ahora l oescribo en términos de fila_actual
-                 0 1 -(fila_actual(4)-fila_actual(3))   0; //punto final del segmento en y, y punto inicial en y. Ahora l oescribo en términos de fila_actual
-                 1 0      0       -rnx;
-                 0 1      0       -rny]
+            global rnx;
+            global rny;
+            rnx = cosd(angulo);
+            rny = sind(angulo);
             
             global Pnx; 
             global Pny;
-            //posicion inicial del rayo
-            Pnx = rayos(1); //P(1,1); 
-            Pny = rayos(2); //P(2,1);
+            Pnx = variables_rebote(1);
+            Pny = variables_rebote(2);
             
-            b = [fila_actual(1); fila_actual(3); Pnx; Pny] //Pirx; Piry; Pnx; Pny (Pnx=2; Pny=8)
-                
-            matrices = linsolve(M,b);
-            matrices = matrices*(-1)
+            global rayos;
+            rayos = [variables_rebote(1), variables_rebote(2)]
             
-    
-            //% Realiza operaciones con la fila actual, por ejemplo:
-    //        disp(fila_actual);
-            disp('Valor de Prx: ', matrices(1))
-            disp('Valor de Pry: ', matrices(2))
-            disp('Valor de lambda: ', matrices(3))
-            disp('Valor de alpha: ', matrices(4))
-            disp('---------------------------')
-    
-            global variables_segmentos;
-            if matrices(3) < 1 && matrices(3) > 0
-                //agrego a lista
-                //el sistema de ecuaciones considera también la proyección de los segmentos. Entonces, vamos a encontrar
-                //que el sist de ec va a ser resuelto con valores positivos.
-                segmentos_chocados = [segmentos_chocados; fila_actual]
-                //plot([rayos(1,1), rayos(1,1)+rnx*matrices(4)], [rayos(1,2), rayos(1,2)+rny*matrices(4)], 'red')
-                variables_segmentos = [variables_segmentos; matrices(1), matrices(2), matrices(3), matrices(4)] //es el mismo orden que arriba
-            end        
+//            variables_rebote = [] descomentando esto se chinguea todo, se hacen calculos "infinitos"
+//            variables_segmentos = []
+//            segmentos_chocados = []
+//            segmento_evaluado = []
         end
-//    end
-    
-    disp(segmentos_chocados)
-    
-    //Menor valor de alpha (longitud)
-    disp('Menor valor de alpha')
-    disp(min(variables_segmentos(:, 4)))
-    
-    //fila completa donde está ese valor menor de alpha
-    [filas, columnas] = find(variables_segmentos == min(variables_segmentos(:, 4)));
-    //disp('Fila donde se encuentra este valor', variables_segmentos(filas, :))
-    //disp(variables_segmentos(filas, :))
-    plot([rayos(1), rayos(1)+rnx*variables_segmentos(filas, 4)], [rayos(2), rayos(2)+rny*variables_segmentos(filas, 4)], 'red')
-    variables_rebote = [variables_segmentos(filas, :)]
-    disp('Variables rebote: ', variables_rebote)
-    //min(variables_segmentos(:, 4))
-    //[filas, columnas] = find(variables_segmentos == min(variables_segmentos(:, 4)));
-    disp(filas)
-    
-    //acá pongo el segmento que fue chocado para acceder a sus posiciones en x e y
-    global segmento_evaluado;
-    segmento_evaluado = segmentos_chocados(filas, :)
-    
-    //vector del segmento
-    v1 = [segmento_evaluado(2) - segmento_evaluado(1),  //Xf-Xi
-          segmento_evaluado(4) - segmento_evaluado(3)]; //Yf-Yi
-
-    v2 = [variables_rebote(1) - rayos(1), 
-          variables_rebote(2) - rayos(2)];
-    
-    prod_escalar = v1(1) * v2(1) + v1(2) * v2(2);
-    disp(prod_escalar)
-    
-    angulo_rebote_segmento = acosd(prod_escalar/(norm(v1) * norm(v2)));
-    disp('Ángulo de rebote', angulo_rebote_segmento);
-    
-    angulo_segmento = asind((segmento_evaluado(4) - segmento_evaluado(3))/norm(v1));
-    disp('Ángulo del segmento respecto del eje X', angulo_segmento)
-    angulo_rayo_rebote_x = angulo_rebote_segmento + angulo_segmento;
-    
-    disp('Ángulo de rebote respecto del eje x: ', angulo_rayo_rebote_x)
-    //disp(modulo(v1(1), v1(2)))
-    //disp('Módulo: ', norm(v1))
-//    disp(v2);
-    
+        
+        disp('------------- FINAL ---------------')
+    end
 endfunction
 
 
 //Vector unitario en x e y del rayo
+global rnx;
+global rny;
 rnx = cosd(angulo);
 rny = sind(angulo);
 
