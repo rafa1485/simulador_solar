@@ -83,27 +83,6 @@ resultado = graficar_segmentos(nombre_input)
 
 
 
-
-//function cosdirectores = graficar_rayos(P, Vu, L)
-//    funcprot(0);
-//    
-//    //acá empieza el rayo
-//    plot([P(1,1), P(1,2)], [P(2,1), P(2,2)])
-//
-//    // Calcular el vector completo multiplicando el vector unitario por la magnitud
-//    vector = L * Vu;
-//    //disp(vector)
-//    
-//    plot([P(1,2), P(1,2)+vector(1)], [P(2,2), P(2,2)+vector(2)], 'red')
-//    cosdirectores = [] //puse esta linea porque sino me decía Undefined variable 'cosdire                         ctores' in function 'graficar_rayos'.
-//    
-//endfunction
-
-
-//ejemplo con -30 grados 
-//Posición inicial del rayo
-//P = [2, 2; 8, 8]
-//plot(P)
 global angulo;
 angulo = -30;
 //Vector unitario. Nos da la dirección del vector. 
@@ -115,24 +94,20 @@ Vu = [cosd(angulo), sind(angulo)]
 //cosdirectores = graficar_rayos(P, Vu, L)
 
 
-
-
-
-
-
-
 function matrices = sistemaecuaciones(Pfrx, Pirx, Pfry, Piry, rnx, rny)
     recorro_otra_vez = 1;
 
     while recorro_otra_vez == 1
         funcprot(0);
         
+        //estos son todos los segmentos que existen
         global segmentos;
         global segmentos_chocados;
         
         [n_filas, n_columnas] = size(segmentos);
         //[fila_rayo, columna_rayo] = size(rayos);
-    
+        disp('VALORES INICIALES DEL RAYO', rayos)
+//        disp('Rnx y Rny: ', rnx, rny)
         //for fila = 1:fila_rayo
             for fila = 1:n_filas
                 //% Accede a la fila actual de la matriz
@@ -149,10 +124,9 @@ function matrices = sistemaecuaciones(Pfrx, Pirx, Pfry, Piry, rnx, rny)
                 //posicion inicial del rayo
                 Pnx = rayos(1); //P(1,1); 
                 Pny = rayos(2); //P(2,1);
-                disp('VALOR QUE ESTOY BUSCANDO DE PUNTO INICIAL EN EL SEGUNDO BUCLE',Pnx)
                 
                 b = [fila_actual(1); fila_actual(3); Pnx; Pny] //Pirx; Piry; Pnx; Pny (Pnx=2; Pny=8)
-                    
+                //resuelvo el sistema de ecuaciones
                 matrices = linsolve(M,b);
                 matrices = matrices*(-1)
                 
@@ -176,29 +150,80 @@ function matrices = sistemaecuaciones(Pfrx, Pirx, Pfry, Piry, rnx, rny)
                     variables_segmentos = [variables_segmentos; matrices(1), matrices(2), matrices(3), matrices(4)] //es el mismo orden que arriba
                 end        
             end
-    //    end
+        //end
+               
+//        disp(segmentos_chocados)
+//        disp(variables_segmentos)
         
-        disp(segmentos_chocados)
+
+        if variables_segmentos == [] 
+           //break; 
+        end
         
+        disp('Variables segmentos')
+        disp(variables_segmentos)
+           
         //Menor valor de alpha (longitud)
         disp('Menor valor de alpha')
         disp(min(variables_segmentos(:, 4)))
         
         //fila completa donde está ese valor menor de alpha
         [filas, columnas] = find(variables_segmentos == min(variables_segmentos(:, 4)));
-        //disp('Fila donde se encuentra este valor', variables_segmentos(filas, :))
-        //disp(variables_segmentos(filas, :))
+
         disp('VALOR ANGULO', angulo)
         plot([rayos(1), rayos(1)+rnx*variables_segmentos(filas, 4)], [rayos(2), rayos(2)+rny*variables_segmentos(filas, 4)], 'red')
         variables_rebote = [variables_segmentos(filas, :)]
         disp('Variables rebote: ', variables_rebote)
         //min(variables_segmentos(:, 4))
         //[filas, columnas] = find(variables_segmentos == min(variables_segmentos(:, 4)));
-        disp(filas)
+        //disp(filas) -------------
         
         //acá pongo el segmento que fue chocado para acceder a sus posiciones en x e y
+
+//        menorvalor = 100000;
+//        recorro la fila 1 y obtengo el valor de la cuarta columna
+//        if menorvalor es > a cuarta columna entonces 
+//        	menor valor = cuarta columna
+
+        [n_filas, n_columnas] = size(variables_segmentos);
+        valor_minimo = 100000;
+        valor_fila = 1;
+        
+        for fila = 1:n_filas
+//            % Obtén la cuarta columna de la fila actual
+            if variables_segmentos(fila, 4) < valor_minimo
+                valor_minimo = variables_segmentos(fila, 4);
+                valor_fila = fila;
+            end
+        end
+
+
         global segmento_evaluado;
-        segmento_evaluado = segmentos_chocados(filas, :)
+
+//        disp(segmento_evaluado)
+//        disp(variables_segmentos(valor_fila));        
+        
+        // Muestra el resultado
+        disp('El valor mínimo en la cuarta columna se encuentra en la fila:');
+        disp(valor_fila);
+        disp('El valor mínimo es:');
+        disp(valor_minimo);
+        disp('SEGMENTO EVALUADO!')
+        //segmento_evaluado = ;
+        disp(segmento_evaluado(valor_fila,:))
+
+
+
+        //segmento_evaluado = segmentos_chocados(filas, :)
+        //filas_con_7 = find(A == 7, 'r');
+        //parafind = min(variables_segmentos(:, 4));
+        //segmento_evaluado = find(variables_segmentos(:, 4) == parafind);
+        
+//        parafind = min(variables_segmentos(:, 4));
+//        segmento_evaluado = find(variables_segmentos(:, 4) == parafind);
+        //segmento_evaluado = find(variables_segmentos == parafind);
+        
+
         
         //vector del segmento
         v1 = [segmento_evaluado(2) - segmento_evaluado(1),  //Xf-Xi
@@ -208,7 +233,7 @@ function matrices = sistemaecuaciones(Pfrx, Pirx, Pfry, Piry, rnx, rny)
               variables_rebote(2) - rayos(2)];
         
         prod_escalar = v1(1) * v2(1) + v1(2) * v2(2);
-        disp(prod_escalar)
+        //disp(prod_escalar) -----------------------
         
         angulo_rebote_segmento = acosd(prod_escalar/(norm(v1) * norm(v2)));
         disp('Ángulo de rebote', angulo_rebote_segmento);
@@ -216,35 +241,35 @@ function matrices = sistemaecuaciones(Pfrx, Pirx, Pfry, Piry, rnx, rny)
         angulo_segmento = asind((segmento_evaluado(4) - segmento_evaluado(3))/norm(v1));
         disp('Ángulo del segmento respecto del eje X', angulo_segmento)
         angulo_rayo_rebote_x = angulo_rebote_segmento + angulo_segmento;
+
         
         disp('Ángulo de rebote respecto del eje x: ', angulo_rayo_rebote_x)
         disp('Punto inicial del nuevo rayo (x,y): ', variables_rebote(1), variables_rebote(2))
     
         //Pfrx, Pirx, Pfry, Piry, rnx, rny
         //tengo que restablecer los valores iniciales del rayo, restablecer los valores de los cosenos directores, dibujar el nuevo rayo
-        
-    //if isempty(segmento_evaluado) then
-    //    recorro_otravez = 0;
-    //else 
-    //    recorro_otravez = 1;
-    //end
-    //    
+
+
         if(recorro_otra_vez == 0) then
             break;
         else
             //rnx, rny, angulo
             global angulo;
             angulo = angulo_rayo_rebote_x;
+            disp('PRUEBA ANGULO PARA VER SI ACTUALIZA: ', angulo)
             
             global rnx;
             global rny;
             rnx = cosd(angulo);
             rny = sind(angulo);
             
-            global Pnx; 
-            global Pny;
-            Pnx = variables_rebote(1);
-            Pny = variables_rebote(2);
+//            global Pnx; 
+//            global Pny;
+//            Pnx = variables_rebote(1);
+//            Pny = variables_rebote(2);
+            
+//            global Vu;
+//            Vu=[rnx, rny]
             
             global rayos;
             rayos = [variables_rebote(1), variables_rebote(2)]
@@ -252,8 +277,13 @@ function matrices = sistemaecuaciones(Pfrx, Pirx, Pfry, Piry, rnx, rny)
 //            variables_rebote = [] descomentando esto se chinguea todo, se hacen calculos "infinitos"
             variables_segmentos = []
 //            segmentos_chocados = []
-//            segmento_evaluado = []
+            segmento_evaluado = []
+
+//            angulo_rebote_segmento = 0;
+//            angulo_segmento = 0;
+//            angulo_rayo_rebote_x = 0;
         end
+        
         
         disp('------------- FINAL ---------------')
     end

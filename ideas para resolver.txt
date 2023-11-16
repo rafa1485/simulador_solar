@@ -1,0 +1,120 @@
+global segmento_evaluado;
+segmento_evaluado = segmentos_chocados(filas, :)
+        
+//vector del segmento
+v1 = [segmento_evaluado(2) - segmento_evaluado(1),  //Xf-Xi
+segmento_evaluado(4) - segmento_evaluado(3)]; //Yf-Yi
+
+v2 = [variables_rebote(1) - rayos(1), 
+variables_rebote(2) - rayos(2)];
+        
+prod_escalar = v1(1) * v2(1) + v1(2) * v2(2);
+//disp(prod_escalar) -----------------------
+        
+angulo_rebote_segmento = acosd(prod_escalar/(norm(v1) * norm(v2)));
+disp('Ángulo de rebote', angulo_rebote_segmento);
+
+
+
+
+variable segmento no se actualiza
+
+
+
+
+
+
+menorvalor = 100000;
+recorro la fila 1 y obtengo el valor de la cuarta columna
+if menorvalor es > a cuarta columna entonces 
+	menor valor = cuarta columna
+
+
+
+
+
+
+
+
+
+
+
+
+
+segmentos = []
+variablessegmentos = []
+
+variables_segmentos_aceptados = []
+
+busco el valor minimo de alpha en variablessegmentos
+guardo la posición de ese valor mínimo
+busco en segmentos el número de la fila 
+imprimo la fila completa
+
+
+
+
+
+
+NO SE ESTÁN cambiando los valores de angulo rebote, angulo segmento x, angulo rebote x
+
+angulo_rebote_segmento
+angulo_segmento
+angulo_rayo_rebote_x
+
+
+
+
+
+
+
+
+alpha menor (si es negativo convertirlo en positivo)
+lambda entre 0 y 1
+controlar que el lambda no sea igual al anterior (tendría que guardarlo en alguna variable)
+
+En la segunda vuelta si yo pongo el alpha como positivo me tomaría el segmento oblicuo, no debería tomar este.
+
+Tiene que haber alguna forma de hacer indicar la dirección del rayo.
+
+
+si el vector unitario en x es negativo entonces tengo que ir para la izquierda, si es positivo va para la derecha. En realidad esto depende de la inclinación del segmento. Si es mayor a 90, 
+Cuando sea negativo el alpha debe ser negativo, si es positivo solo se deben guardar los positivos. 
+
+
+Todo depende del rebote del rayo y de los valores de alpha
+
+
+Ideas
+- si el angulo de rebote es mayor a 
+
+
+
+
+angulo de rebote en x = 90
+angulo de rebote en x = angulo rebote segmento + angulo segmento;
+
+
+
+
+
+
+
+
+
+
+  "Ángulo de rebote respecto del eje x: "
+
+   210. (esto indica que va a ir hacia la izquierda). 
+	los ángulos menores a 90 y mayores a 270 son para la derecha.
+
+
+
+
+
+
+
+
+
+
+
