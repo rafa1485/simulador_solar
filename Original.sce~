@@ -101,7 +101,7 @@ function matrices = sistemaecuaciones(Pfrx, Pirx, Pfry, Piry, rnx, rny)
     recorro_otra_vez = 1;
 
     //while recorro_otra_vez == 1
-    for i = 1:2,
+    for i = 1:5,
         funcprot(0);
         
         //estos son todos los segmentos que existen
@@ -144,12 +144,12 @@ function matrices = sistemaecuaciones(Pfrx, Pirx, Pfry, Piry, rnx, rny)
                 disp('Valor de Pry: ', matrices(2))
                 disp('Valor de lambda: ', matrices(3))
                 disp('Valor de alpha: ', alpha)
-                disp(rnx)
-                disp(rny)
+//                disp(rnx)
+//                disp(rny)
                 disp('---------------------------')
         
                 global variables_segmentos;
-                if matrices(3) < 1 && matrices(3) > 0 && alpha > 0 //acá tendría que agregar que la distancia no sea igual a la distancia anterior. Cosa de que no apunte al mismo segmento
+                if matrices(3) < 1 && matrices(3) > 0 && alpha > 0.1 //acá tendría que agregar que la distancia no sea igual a la distancia anterior. Cosa de que no apunte al mismo segmento
                     //agrego a lista
                     //el sistema de ecuaciones considera también la proyección de los segmentos. Entonces, vamos a encontrar que el sist de ec va a ser resuelto con valores positivos.
                     segmentos_chocados = [segmentos_chocados; fila_actual]
@@ -174,16 +174,16 @@ function matrices = sistemaecuaciones(Pfrx, Pirx, Pfry, Piry, rnx, rny)
         //fila completa donde está ese valor menor de alpha
         [filas, columnas] = find(variables_segmentos == min(variables_segmentos(:, 4)));
 
-        disp('REVISAR')        
-        
-        disp('Lista de segmentos donde impacta')
-        disp(variables_segmentos)
-        
-        disp('Coordenadas del menor valor de alfa dentro de la matriz variables_segmentos')
-        disp(filas, columnas)
-        
-        disp('Posiciòn inicial del rayo')
-        disp(rayos)
+//        disp('REVISAR')        
+//        
+//        disp('Lista de segmentos donde impacta')
+//        disp(variables_segmentos)
+//        
+//        disp('Coordenadas del menor valor de alfa dentro de la matriz variables_segmentos')
+//        disp(filas, columnas)
+//        
+//        disp('Posiciòn inicial del rayo')
+//        disp(rayos)
         
         impacto_rayo_x = rayos(1)+rnx*variables_segmentos(filas, 4)
         impacto_rayo_y = rayos(2)+rny*variables_segmentos(filas, 4)
@@ -200,7 +200,7 @@ function matrices = sistemaecuaciones(Pfrx, Pirx, Pfry, Piry, rnx, rny)
         
         
         //acá pongo el segmento que fue chocado para acceder a sus posiciones en x e y
-        disp('el segmento chocado por el rayo')
+//        disp('el segmento chocado por el rayo')
         global segmento_evaluado; 
         segmento_evaluado = segmentos_chocados(filas, :)
         disp(segmento_evaluado)
@@ -223,18 +223,18 @@ function matrices = sistemaecuaciones(Pfrx, Pirx, Pfry, Piry, rnx, rny)
         disp(solucion_sistema)
         
         // punto por donde pasa la perpendicular
-        disp('punto por donde pasa la perpendicular')
+//        disp('punto por donde pasa la perpendicular')
         punto_perpendicular = solucion_sistema([1,2])
-        disp(punto_perpendicular)  //esto es PX = [PXx; PXy]
+//        disp(punto_perpendicular)  //esto es PX = [PXx; PXy]
         
         
         // Calculo del versor normal
         N = (rayos' - punto_perpendicular)
-        disp(N)
-        disp(norm(N))
+//        disp(N)
+//        disp(norm(N))
         n = N / norm(N)
-        disp('versor normal')
-        disp(n)
+//        disp('versor normal')
+//        disp(n)
         
         // Calculo del versos colineal
         vector_inicial_segmento = [segmento_evaluado(1), segmento_evaluado(3)]
@@ -243,20 +243,20 @@ function matrices = sistemaecuaciones(Pfrx, Pirx, Pfry, Piry, rnx, rny)
         disp(vector_final_segmento)
         
         J = vector_final_segmento - vector_inicial_segmento;
-        disp('Valor de J', J)
+//        disp('Valor de J', J)
         j = J / norm(J)
-        disp('versor j', j)
+//        disp('versor j', j)
 
 
         punto_donde_choca = [impacto_rayo_x, impacto_rayo_y]
         d1 = (punto_donde_choca-rayos)*j' //d = ()punto donde choca el rayo al segmento - punto inicial del rayo)*j
         d2 = (punto_donde_choca-rayos)*n
-        disp('D1', d1)        
-        disp('D2',d2)        
+//        disp('D1', d1)        
+//        disp('D2',d2)        
         RR = d1*j - d2*n'
-        disp('RR', RR)
+//        disp('RR', RR)
         rr = RR/norm(RR)
-        disp('rr', rr)
+//        disp('rr', rr)
         
         rayos = punto_donde_choca
         rnx = rr(1)
@@ -266,14 +266,13 @@ function matrices = sistemaecuaciones(Pfrx, Pirx, Pfry, Piry, rnx, rny)
         segmentos_chocados = []
         //variables_segmentos = []
         segmento_evaluado = []
+        variables_segmentos = [];
 
-
+//        alpha = 0;
         disp('------------- FINAL ---------------')
 
     end
     
-    //1.   4.5506823
-//    plot([1,5],[4.5506823, 1], 'red')
 endfunction
 
 
