@@ -1,5 +1,6 @@
 clear;
 clc;
+clf;
 
 
 global Pirx;
@@ -9,6 +10,8 @@ global Piry;
 global Pnx; 
 global Pny; 
 global alpha;
+global segmento_evaluado;
+
 alpha = 0;
 //guarda todos los segmentos del excel
 global segmentos;
@@ -155,6 +158,10 @@ function matrices = sistemaecuaciones(Pfrx, Pirx, Pfry, Piry, rnx, rny)
                     segmentos_chocados = [segmentos_chocados; fila_actual]
                     //plot([rayos(1,1), rayos(1,1)+rnx*matrices(4)], [rayos(1,2), rayos(1,2)+rny*matrices(4)], 'red')
                     variables_segmentos = [variables_segmentos; matrices(1), matrices(2), matrices(3), matrices(4)] //es el mismo orden que arriba
+                else
+                    disp('La solución: ')
+                    disp(matrices)
+                    disp('No cumple las condiciones, por lo que no hay rayos que impacten en un espejo')
                 end        
             end
         //end
@@ -200,8 +207,13 @@ function matrices = sistemaecuaciones(Pfrx, Pirx, Pfry, Piry, rnx, rny)
         
         
         //acá pongo el segmento que fue chocado para acceder a sus posiciones en x e y
+<<<<<<< HEAD
 //        disp('el segmento chocado por el rayo')
         global segmento_evaluado; 
+=======
+        disp('el segmento chocado por el rayo')
+        pause
+>>>>>>> 35de1c530bc18803f09e86dd7e8e6c0df3f664fc
         segmento_evaluado = segmentos_chocados(filas, :)
         disp(segmento_evaluado)
         
@@ -266,10 +278,18 @@ function matrices = sistemaecuaciones(Pfrx, Pirx, Pfry, Piry, rnx, rny)
         segmentos_chocados = []
         //variables_segmentos = []
         segmento_evaluado = []
+<<<<<<< HEAD
         variables_segmentos = [];
 
 //        alpha = 0;
+=======
+        
+        
+
+>>>>>>> 35de1c530bc18803f09e86dd7e8e6c0df3f664fc
         disp('------------- FINAL ---------------')
+        
+        pause
 
     end
     
